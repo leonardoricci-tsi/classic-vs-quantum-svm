@@ -33,8 +33,7 @@ feature_map = ZZFeatureMap(feature_dimension=2, reps=2)
 q_kernel = FidelityQuantumKernel(feature_map=feature_map)
 qsvc = QSVC(quantum_kernel=q_kernel)
 
-# 3. Treinamento Quântico (Medindo Tempo)
-print(f"Iniciando treinamento Quântico no M4 para as classes {np.unique(y)}...")
+print(f"Iniciando treinamento Quântico para as classes {np.unique(y)}...")
 start_time = time.time()
 qsvc.fit(X_train, y_train)
 end_time = time.time()
@@ -44,7 +43,7 @@ process_time_q = end_time - start_time
 # 4. Avaliação e Métricas
 y_pred_q = qsvc.predict(X_test)
 acc_q = accuracy_score(y_test, y_pred_q)
-matrix_train = q_kernel.evaluate(x_vec=X_train) # Para o gráfico de Hilbert
+matrix_train = q_kernel.evaluate(x_vec=X_train) 
 
 print(f"\n--- RESULTADOS QUÂNTICOS (3, 5, 8 | PCA 2D) ---")
 print(f"Acurácia Quântica: {acc_q:.4f}")
@@ -52,7 +51,6 @@ print(f"Tempo de Processamento Quântico: {process_time_q:.4f} segundos")
 print("\nRelatório de Classificação:")
 print(classification_report(y_test, y_pred_q, target_names=['Dígito 3', 'Dígito 5', 'Dígito 8']))
 
-# --- GERAÇÃO E SALVAMENTO DOS GRÁFICOS ---
 
 # Imagem 1: Projeção do Espaço de Hilbert
 plt.figure(figsize=(10, 8))
@@ -61,8 +59,6 @@ plt.title(f"Espaço de Hilbert (Matriz de Fidelidade)\nTempo: {process_time_q:.2
 plt.savefig(os.path.join(output_dir, "01_hilbert_matrix_quantum.png"), dpi=300, bbox_inches='tight')
 plt.close()
 
-# Imagem 2: F1-Score por Classe (Gráfico de Linhas)
-# (Nota: Para este gráfico ser comparativo, deves usar os dados do clássico que já tens)
 classes = ['Dígito 3', 'Dígito 5', 'Dígito 8']
 f1_quantum = f1_score(y_test, y_pred_q, average=None)
 
@@ -81,16 +77,13 @@ for i, txt in enumerate(f1_quantum):
 plt.savefig(os.path.join(output_dir, "02_performance_f1_quantum.png"), dpi=300, bbox_inches='tight')
 plt.close()
 
-# Imagem 3: Fronteira de Decisão Quântica
 def save_quantum_decision_boundary(X, y, model, title, folder):
     print("\nGerando fronteira de decisão quântica (isso pode demorar alguns minutos)...")
-    # Grid menos denso (h=0.1) devido ao custo computacional do QSVC
     h = .1 
     x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
     y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
     xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
     
-    # Fazendo predições para o grid
     Z = model.predict(np.c_[xx.ravel(), yy.ravel()])
     Z = Z.reshape(xx.shape)
     
